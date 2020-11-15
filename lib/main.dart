@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:learning_flutter_4/widgets/transaction_list.dart';
 
-import './transaction.dart';
+import './widgets/new_transactions.dart';
+import './models/transaction.dart';
 
 void main() => runApp(MyApp());
 
@@ -14,8 +16,13 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatelessWidget {
-  final List<Transaction> transactions = [
+class MyHomePage extends StatefulWidget {
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  final List<Transaction> _transactions = [
     Transaction(
       id: '1',
       title: 'New Shoes',
@@ -25,50 +32,57 @@ class MyHomePage extends StatelessWidget {
     Transaction(
       id: '2',
       title: 'Groceries',
-      amount: 20.00,
+      amount: 20.12,
       date: DateTime.now(),
     ),
   ];
 
+  void _addTransaction(Transaction transaction) {
+    setState(() {
+      _transactions.add(transaction);
+    });
+  }
+
+  void startAddTransaction(BuildContext ctx) {
+    showModalBottomSheet(
+        context: ctx,
+        builder: (bCtx) {
+          return NewTransaction(_addTransaction);
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text('Flutter App'),
-        ),
-        body: Column(
+      appBar: AppBar(
+        title: Text('Flutter App'),
+        actions: [
+          IconButton(
+              icon: Icon(
+                Icons.add,
+                color: Colors.white,
+              ),
+              onPressed: () => startAddTransaction(context))
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
           children: [
             Card(
               elevation: 3,
-              color: Colors.orange,
               child: Container(
-                width: 100,
-                height: 100,
                 child: Text('Chart!'),
               ),
             ),
-            Column(
-              children: transactions
-                  .map((tx) => Card(
-                        child: Row(
-                          children: [
-                            Container(
-                              child: Text(
-                                tx.amount.toString(),
-                              ),
-                            ),
-                            Column(
-                              children: [
-                                Text(tx.title),
-                                Text(tx.date.toIso8601String())
-                              ],
-                            ),
-                          ],
-                        ),
-                      ))
-                  .toList(),
-            ),
+            TransactionList(_transactions)
           ],
-        ));
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: () => startAddTransaction(context),
+      ),
+    );
   }
 }
